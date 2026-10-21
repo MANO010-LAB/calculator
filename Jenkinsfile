@@ -22,6 +22,19 @@ pipeline {
                 }
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn -B verify sonar:sonar'
+                        } else {
+                            bat 'mvn -B verify sonar:sonar'
+                        }
+                    }
+                }
+            }
+        }
     }
 
     post {
