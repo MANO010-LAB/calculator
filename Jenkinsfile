@@ -11,19 +11,15 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build') {
+        stage('Build and Test') {
             steps {
-                sh 'mvn -B clean compile'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn -B test'
-            }
-        }
-        stage('Package') {
-            steps {
-                sh 'mvn -B package -DskipTests'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn -B clean verify'
+                    } else {
+                        bat 'mvn -B clean verify'
+                    }
+                }
             }
         }
     }
@@ -31,6 +27,7 @@ pipeline {
     post {
         always {
             junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
         }
     }
 }
